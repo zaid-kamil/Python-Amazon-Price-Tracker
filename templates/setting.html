@@ -1,0 +1,153 @@
+<html>
+
+<head>
+    <title>Python Amazon Price Tracker - Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon"
+        href="https://github.com/donaldzou/Python-Amazon-Price-Tracker/raw/master/templates/amazon-icon-1.png"
+        type="image/x-icon" />
+    <link rel="shortcut icon"
+        href="https://github.com/donaldzou/Python-Amazon-Price-Tracker/raw/master/templates/amazon-icon-1.png"
+        type="image/x-icon" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"
+        integrity="sha512-rqQltXRuHxtPWhktpAZxLHUVJ3Eombn3hvk9PHjV/N5DMUYnzKPC1i3ub0mEXgFzsaZNeJcoE0YHq0j/GFsdGg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            background-color: #242d35 !important;
+        }
+
+        .search-bar {
+            padding-top: 5vh;
+            padding-bottom: 5vh;
+            background-color: #242d35 !important;
+            color: white;
+        }
+
+        .table-div {
+            background-color: #242d35 !important;
+            color: white;
+        }
+
+        .table {
+            color: white
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar sticky-top navbar-expand-lg navbar navbar-dark bg-dark">
+        <a class="navbar-brand text-warning" href="#">Python Amazon Price Tracker</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                {% if session.is_auth %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">Register</a>
+                </li>
+                {% endif %}
+                
+                <li class="nav-item active">
+                    <a class="nav-link" href="/email">Email List<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/setting">Setting</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class='search-bar'>
+        <div class='container'>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Settings Saved!</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <h1 style="padding-bottom: 20px;">Settings</h1>
+            <div id="setting">
+
+            </div>
+            <!-- <div class='row'><div class="col-sm-2"><p>Tracker Sleep Time (In Seconds)</p></div><div class="col-sm-10"><div class="form-group"><input type="text" class="form-control" id="sleep_time" placeholder="Tracker Sleep Time"></div></div></div> -->
+            <hr>
+            <button id='save' type="button" class="btn btn-warning" style="width:100%">Save</button>
+        </div>
+    </div>
+    </div>
+</body>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"
+    integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+    crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+    integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+    crossorigin="anonymous"></script>
+<script>
+    function get_setting() {
+        $.get("/get_setting", function (data, status) {
+            $("#setting").html("")
+            for (var i = 0; i < data['all_setting'].length; i++) {
+                cur = data['all_setting'][i]
+                html = ""
+                html += '<div class="row"><div class="col-sm-2"><p>' + cur['description'] + '</p></div>'
+                if (data['all_setting'][i]['edit'] == "true") {
+                    html += '<div class="col-sm-10"><div class="form-group"><input type="text" class="form-control" id="' + cur['title'] + '" placeholder="Tracker Sleep Time" value="' + cur['content'] + '"></div></div></div>'
+                }
+                else {
+                    html += '<div class="col-sm-10"><p>' + cur['content'] + '</p></div></div>'
+                }
+                $("#setting").append(html)
+            }
+        });
+    }
+
+
+
+    $(document).ready(function () {
+        $(".alert").hide()
+        get_setting();
+        $("#save").click(function () {
+            settings = {}
+            $("#setting :input").each(function () {
+                settings[$(this).attr('id')] = $(this).val()
+            })
+            $.ajax({
+                method: "POST",
+                url: "/save_setting",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify(settings),
+                success: function (response) {
+                    $(".alert").show()
+                    get_setting();
+                }
+            });
+        })
+
+    })
+
+</script>
+
+</html>

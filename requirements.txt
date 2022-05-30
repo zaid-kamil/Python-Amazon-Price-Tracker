@@ -1,0 +1,5 @@
+tinydb
+beautifulsoup4
+requests
+sqlalchemy
+flask
